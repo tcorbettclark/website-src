@@ -44,6 +44,7 @@ SOCIAL = (
     ('Twitter', 'https://twitter.com/tcorbettclark'),
     ('Github', 'https://github.com/tcorbettclark'),
     ('LinkedIn', 'https://www.linkedin.com/in/tcorbettclark'),
+    ('Quora', 'https://www.quora.com/profile/Timothy-Corbett-Clark'),
 )
 
 # Only publish articles and pages if explicit "Status: published"
