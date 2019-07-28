@@ -1,5 +1,5 @@
 AUTHOR = 'Timothy Corbett-Clark'
-SITENAME = 'Timothy Corbett-Clark'
+SITENAME = 'Dr Timothy Corbett-Clark'
 SITEURL = ''
 
 PATH = 'content'

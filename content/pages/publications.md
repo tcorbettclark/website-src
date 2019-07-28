@@ -1,9 +1,7 @@
 Title: Publications
-Date: 2019-01-01
-Modified: 2019-01-01
 Status: published
 
-The following PDF papers are quite old...
+The following PDF papers are all rather old...
 
 * My [DPhil](https://uni-of-oxford.custhelp.com/app/answers/detail/a_id/185/~/what-is-a-dphil) thesis, [Explanation from Neural Networks]({static}/pdf/thesis.pdf). 
 * Introductory notes on Independent Component Analysis and the Blind Separation of Sources problem: [ICA introduction]({static}/pdf/ica_introduction.pdf).
