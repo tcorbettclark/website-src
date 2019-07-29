@@ -62,14 +62,16 @@ MENUITEMS = [
     ['', "feeds/all.atom.xml", 'fa-rss']
 ]
 
-FEED_ATOM = 'feeds'
 FEED_ALL_ATOM = 'feeds/all.atom.xml'
 AUTHOR_FEED_ATOM = None
 TAG_FEED_ATOM = None
 CATEGORY_FEED_ATOM = None
-
-FEED_RSS = None
 TRANSLATION_FEED_ATOM = None
+
+FEED_ALL_RSS = None
+AUTHOR_FEED_RSS = None
+TAG_FEED_RSS = None
+CATEGORY_FEED_RSS = None
 TRANSLATION_FEED_RSS = None
 
 import os
