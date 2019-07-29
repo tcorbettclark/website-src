@@ -7,6 +7,8 @@ TIMEZONE = 'Europe/London'
 DEFAULT_PAGINATION = False
 RELATIVE_URLS = False
 
+ADDTHIS_PROFILE = 'ra-5d3f3e0f6b76330d'
+ADDTHIS_FACEBOOK_LIKE = False
 
 FAVICON = 'img/favicon.ico'
 SITELOGO = 'img/tcc1.jpg'

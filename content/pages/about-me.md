@@ -9,4 +9,4 @@ This blog will be a record of my thoughts, ideas, and results as they continue t
 
 ## Contact me
 
-I welcome feedback and enjoy collaborative discussion, so feel free to contact me using any of the social links down on the right hand side.
+I welcome feedback and enjoy collaborative discussion, so feel free to contact me using any of the social links shown in the banner.
