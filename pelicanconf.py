@@ -26,11 +26,14 @@ JINJA_ENVIRONMENT = {
     'extensions': ['jinja2.ext.i18n'],
 }
 
-BOOTSTRAP_THEME = 'cerulean'
+BOOTSTRAP_THEME = 'readable'
+# BOOTSTRAP_THEME = 'cerulean'
 # BOOTSTRAP_THEME = 'paper'
 # BOOTSTRAP_THEME = 'yeti'
 
 PYGMENTS_STYLE = 'monokai'
+
+TYPOGRIFY = True
 
 DEFAULT_LANG = 'en'
 TIMEZONE = 'Europe/London'
@@ -55,20 +58,17 @@ DEFAULT_METADATA = {
 DEFAULT_PAGINATION = False
 RELATIVE_URLS = False
 
-# No feeds during development
-FEED_ALL_ATOM = None
-CATEGORY_FEED_ATOM = None
-TRANSLATION_FEED_ATOM = None
-AUTHOR_FEED_ATOM = None
-AUTHOR_FEED_RSS = None
+MENUITEMS = [
+    ['', "feeds/all.atom.xml", 'fa-rss']
+]
 
 import os
 if os.environ.get("PUBLISH_PELICAN"):
     SITEURL = 'https://www.corbettclark.com'
     OUTPUT_PATH = "../tcorbettclark.github.io/"
 
+    FEED_DOMAIN = SITEURL
     FEED_ALL_ATOM = 'feeds/all.atom.xml'
-    CATEGORY_FEED_ATOM = 'feeds/{slug}.atom.xml'
 
     # DISQUS_SITENAME = ""
     # GOOGLE_ANALYTICS = ""

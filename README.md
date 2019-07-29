@@ -1,5 +1,9 @@
 # README
 
+## Development setup
+
+* `pip install pelican markdown typogrify`
+
 ## How to
 
 * To develop: `pelican -r -l -p 8923`
