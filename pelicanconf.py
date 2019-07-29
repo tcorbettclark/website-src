@@ -62,18 +62,21 @@ MENUITEMS = [
     ['', "feeds/all.atom.xml", 'fa-rss']
 ]
 
+FEED_ATOM = 'feeds'
+FEED_ALL_ATOM = 'feeds/all.atom.xml'
+AUTHOR_FEED_ATOM = None
+TAG_FEED_ATOM = None
+CATEGORY_FEED_ATOM = None
+
+FEED_RSS = None
+TRANSLATION_FEED_ATOM = None
+TRANSLATION_FEED_RSS = None
+
 import os
 if os.environ.get("PUBLISH_PELICAN"):
     SITEURL = 'https://www.corbettclark.com'
     OUTPUT_PATH = "../tcorbettclark.github.io/"
-
     FEED_DOMAIN = SITEURL
-    FEED_ALL_ATOM = 'feeds/all.atom.xml'
-
-    AUTHOR_FEED_ATOM = None
-    AUTHOR_FEED_RSS = None
-    TAG_FEED_ATOM = None
-    CATEGORY_FEED_ATOM = None
 
     # DISQUS_SITENAME = ""
     # GOOGLE_ANALYTICS = ""
