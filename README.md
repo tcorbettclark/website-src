@@ -6,7 +6,7 @@
 
 ## How to
 
-* To develop: `pelican -r -l -p 8923`
+* To develop: `pelican -r -l -p 8923 --ignore-cache`
 * To publish: `env PUBLISH_PELICAN=yes pelican --ignore-cache`
 
 ## TODO
