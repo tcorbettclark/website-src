@@ -7,6 +7,11 @@ TIMEZONE = 'Europe/London'
 DEFAULT_PAGINATION = False
 RELATIVE_URLS = False
 
+
+FAVICON = 'img/favicon.ico'
+SITELOGO = 'img/tcc1.jpg'
+SITELOGO_SIZE = 36
+
 PATH = 'content'
 PAGE_PATHS = ['pages', ]
 ARTICLE_PATHS = ['articles', ]
