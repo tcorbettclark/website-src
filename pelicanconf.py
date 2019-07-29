@@ -70,5 +70,10 @@ if os.environ.get("PUBLISH_PELICAN"):
     FEED_DOMAIN = SITEURL
     FEED_ALL_ATOM = 'feeds/all.atom.xml'
 
+    AUTHOR_FEED_ATOM = None
+    AUTHOR_FEED_RSS = None
+    TAG_FEED_ATOM = None
+    CATEGORY_FEED_ATOM = None
+
     # DISQUS_SITENAME = ""
     # GOOGLE_ANALYTICS = ""
