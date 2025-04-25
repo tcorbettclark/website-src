@@ -121,7 +121,7 @@ async def run_server_and_rebuild_after_changes():
     )
     await runner.setup()
     site = web.TCPSite(runner, host=HOST, port=PORT)
-    logger.info(f"Starting test server on http://{HOST}:{PORT}")
+    logger.info(f"Starting local server on http://{HOST}:{PORT}")
     logger.info(f"Serving files from {OUTPUT_DIR}")
     logger.info(f"Watching for changes in {CONTENT_DIR}")
     try:

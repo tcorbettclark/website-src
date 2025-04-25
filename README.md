@@ -13,14 +13,12 @@ To update content, rebuild, and deploy:
 The key features of my approach are:
 
 * Just code i.e. not another static site generator library! (see https://jamstack.org/generators/ ...)
-* This about making and maintaining pages of content. No blog posts, tags, articles, Atom or RSS feeds etc.
-* All web artifacts kept together in one directory tree.
-* After processing, files or directories starting with an underscore are removed from the output.
+* Support writing and maintaining pages of content. No blog posts, tags, articles, Atom or RSS feeds etc.
+* All web artifacts are kept together in one directory tree.
 * Freely mix HTML with/without Jinja2 templates and Markdown with TOML frontmatter for metadata (also passed through Jinja2 templates).
 * Extra metadata provided to the Jinja templates e.g. for timestamps and to create path navigation.
 * Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
-* Hot reloader localhost server which rebuilds on change and asks browser(s) to reload.
-* (No caching as plenty faster enough without complexity penalty or subtle gotchas.)
+* Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
 The build process works as follows:
 
@@ -31,6 +29,8 @@ The build process works as follows:
 1.1 Delete all source files and directories (anything with a leading underscore in the path segment).
 
 The end result is a clean output directory ready for deployment.
+
+Every build is a clean build. No caching as plenty faster enough without complexity penalty or subtle gotchas.
 
 # TODO
 
