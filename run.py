@@ -21,6 +21,7 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 TEMPLATE_DATA_FILENAME = "_template_data.toml"
 HOST = "localhost"
 PORT = 8000
+HOT_RELOADER_TIMEOUT = 30
 
 
 def is_source_filename(name):
@@ -91,13 +92,31 @@ def rebuild():
 
 
 async def run_server_and_rebuild_after_changes():
+    reload_request_events = set()
+
+    async def hot_reloader_handler(request):
+        e = asyncio.Event()
+        reload_request_events.add(e)
+        response = web.Response(text="Unknown")
+        try:
+            logger.info("Started new hot-reloader")
+            await asyncio.wait_for(e.wait(), HOT_RELOADER_TIMEOUT)
+            logger.info("Hot-reloader sent reload action")
+            response = web.Response(text="Reload")
+        except asyncio.TimeoutError:
+            logger.info("Hot-reloader sent timeout action")
+            response = web.Response(text="Timeout")
+        reload_request_events.remove(e)
+        return response
+
     app = web.Application()
     app.router.add_static("/", path=OUTPUT_DIR, show_index=True)
+    app.router.add_route("GET", "/hot-reloader", hot_reloader_handler)
 
     runner = web.AppRunner(
         app,
         access_log=logger,
-        access_log_format="Web request HTTP %r %s %b",
+        access_log_format="Web response HTTP %r %s %b",
         handle_signals=True,
     )
     await runner.setup()
@@ -119,6 +138,11 @@ async def run_server_and_rebuild_after_changes():
             logger.info(
                 f"Continuing to serve (updated) files from {OUTPUT_DIR}"
             )
+            logger.info(
+                f"Signalling to {len(reload_request_events)} hot-reloaders"
+            )
+            for e in list(reload_request_events):
+                e.set()
     finally:
         logger.info("Stopping server")
         await runner.cleanup()

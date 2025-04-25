@@ -19,7 +19,8 @@ The key features of my approach are:
 * Freely mix HTML with/without Jinja2 templates and Markdown with TOML frontmatter for metadata (also passed through Jinja2 templates).
 * Extra metadata provided to the Jinja templates e.g. for timestamps and to create path navigation.
 * Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
-* Reloader and local dev server, with no caching as plenty faster enough without complexity penalty or subtle gotchas.
+* Hot reloader localhost server which rebuilds on change and asks browser(s) to reload.
+* (No caching as plenty faster enough without complexity penalty or subtle gotchas.)
 
 The build process works as follows:
 
