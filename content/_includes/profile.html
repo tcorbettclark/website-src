@@ -1,0 +1,14 @@
+<div class="card">
+    <div class="card-image">
+        <figure class="image">
+            <img src="{{ MY_PIC }}" alt="My profile picture" />
+        </figure>
+    </div>
+    <div class="card-content">
+        <div class="container has-text-centered has-text-link">
+            {% for ms in MY_SOCIALS %}
+                <a href="{{ ms.url }}" target="_blank"><i class="fa-brands {{ms.fa_class}}"></i></a>
+            {% endfor %}
+        </div>
+    </div>
+</div>

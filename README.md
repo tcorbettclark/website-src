@@ -1,17 +1,48 @@
 # README
 
-## Development setup
+My home page is built using a simple home grown static site generator.
 
-* `pip install pelican markdown typogrify`
+To update content, rebuild, and deploy:
+```
+  uv run python main.py
+  ...view / review on locally served site
+  ...make changes and tool will reload
+  ...update git repo and push to github
+```
 
-## How to
+The key features of my approach are:
 
-* To develop: `pelican -r -l -p 8923 --ignore-cache`
-* To publish: `env PUBLISH_PELICAN=yes pelican --ignore-cache`
+* Just code i.e. not another static site generator library! (see https://jamstack.org/generators/ ...)
+* This about making and maintaining pages of content. No blog posts, tags, articles, Atom or RSS feeds etc.
+* All web artifacts kept together in one directory tree.
+* After processing, files or directories starting with an underscore are removed from the output.
+* Freely mix HTML with/without Jinja2 templates and Markdown with TOML frontmatter for metadata (also passed through Jinja2 templates).
+* Extra metadata provided to the Jinja templates e.g. for timestamps and to create path navigation.
+* Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
+* Reloader and local dev server, with no caching as plenty faster enough without complexity penalty or subtle gotchas.
 
-## TODO
+The build process works as follows:
 
+1 Clone the content directory into a new output directory.
+1 Using only the output directory
+1.1 Convert each markdown file (`*.md`) to an HTML (`*.html`) file of same name, optionally applying Jinja2 template specified in the frontmatter.
+1.1 Apply Jinja2 templates to all HTML files which do not start with an underscore, and render back in place.
+1.1 Delete all source files and directories (anything with a leading underscore in the path segment).
+
+The end result is a clean output directory ready for deployment.
+
+# TODO
+
+* Content: skills, interests, now page, tools
+
+* Move the explanation into one of the web pages, and link from here.
+
+* Remake favicon.ico
 * Find a link to the PDF for my "Choosing an appropriate model for novelty detection" paper.
-* Select better font e.g. to spectral google font. See also <https://design.google/library/choosing-web-fonts-beginners-guide/>
+  See https://ieeexplore.ieee.org/document/607503
 * Add Google analytics
-* Add disqus support
+* Add a robots.txt file, and add a sitemap.xml
+  See https://thatware.co/xml-sitemap-creation-python/
+  See https://michael-lisboa.medium.com/automate-your-sitemap-xml-with-python-and-deploy-it-as-a-cron-job-to-google-cloud-c5c4f986c734
+  Note also need to submit to search engines (once)
+* Typogrify - its added to uv. Do I need it??

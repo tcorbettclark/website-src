@@ -5,5 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pelican>=4.11.0",
+    "aiohttp>=3.11.18",
+    "jinja2>=3.1.6",
+    "markdown>=3.8",
+    "toml>=0.10.2",
+    "typogrify>=2.1.0",
+    "watchfiles>=1.0.5",
 ]

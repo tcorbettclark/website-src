@@ -1,0 +1,106 @@
+DEFAULT_LANG = "en"
+SITENAME = "Dr Timothy Corbett-Clark"
+SITEDESCRIPTION = "Personal website of Dr Timothy Corbett-Clark"
+
+CSS_FILE = "main.css"
+
+# TODO - sort/fix
+GOOGLE_ANALYTICS = "UA-6880945-2" # also the analytics.html template
+
+MY_NAME = "Dr Timothy Corbett-Clark"
+MY_SHORT_NAME = "Tim C-C"
+MY_PIC = "img/me.jpg"
+MY_TAGLINE = "CTO, Researcher, Architect, Developer"
+
+
+MY_CAREER_SUMMARY = "TODO copy from LinkedIn"
+
+AUTHOR = "Timothy Corbett-Clark"
+GITHUB_URL = "https://github.com/tcorbettclark/tcorbettclark.github.io"
+COPYRIGHT_FOOTER = "Timothy Corbett-Clark, 2025"
+FAVICON = "img/favicon.ico"                                             # TODO make a nice black and white version of this
+
+
+[[MY_INTERESTS]]
+topic = "Maths"
+fa_class = "fa-shapes"
+
+[[MY_INTERESTS]]
+topic = "Philosophy"
+fa_class = "fa-lightbulb"
+
+[[MY_INTERESTS]]
+topic = "AI/ML"
+fa_class = "fa-share-nodes"
+
+[[MY_INTERESTS]]
+topic = "Music"
+fa_class = "fa-music"
+
+[[MY_INTERESTS]]
+topic = "Skiing"
+fa_class = "fa-person-skiing"
+
+[[MY_INTERESTS]]
+topic = "Chess"
+fa_class = "fa-chess-knight"
+
+[[MY_INTERESTS]]
+topic = "Programming"
+fa_class = "fa-code"
+
+[[MY_INTERESTS]]
+topic = "Writing"
+fa_class = "fa-book"
+
+[[MY_INTERESTS]]
+topic = "Learning"
+fa_class = "fa-graduation-cap"
+
+[[MY_INTERESTS]]
+topic = "Money"
+fa_class = "fa-sack-dollar"
+
+
+[[MY_SOCIALS]]
+fa_class = "fa-linkedin"
+url = "https://www.linkedin.com/in/tcorbettclark/"
+
+[[MY_SOCIALS]]
+fa_class = "fa-github"
+url = "https://github.com/tcorbettclark"
+
+[[MY_SOCIALS]]
+fa_class = "fa-quora"
+url = "https://quora.com/Timothy-Corbett-Clark"
+
+[[MY_SOCIALS]]
+fa_class = "fa-stack-overflow"
+url = "https://stackoverflow.com/users/1980944/timothy-corbett-clark"
+
+[[MY_SOCIALS]]
+fa_class = "fa-bluesky"
+url = "https://bluesky.app/@tcorbettclark"
+
+[[MY_SOCIALS]]
+fa_class = "fa-orcid"
+url = "https://orcid.org/0009-0004-7391-744X"
+
+
+[[MY_EDUCATION]]
+degree = "asdf"
+asdf = "nology (NSIT)"
+time = "2012 - 2016"
+
+MY_PROJECT_INTRO = "You can list your side projects or open source libraries in this section. "
+
+[[MY_PROJECTS]]
+title = "Open Source Contributions"
+tagline = "blah."
+
+
+[[MY_EXPERIENCE]]
+job_title = "Software Development Engineer"
+time = "Oct 2016 - Present"
+company = "Zomato, Gurgaon IN"
+details = "Part of the web team working on developing a smart POS system for restaurants."

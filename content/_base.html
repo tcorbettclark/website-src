@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ DEFAULT_LANG }}">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="{{ ROBOTS }}" />
+        <meta name="author" content="{{ AUTHOR }}" />
+        <meta name="description" content="{{ SITEDESCRIPTION }}" />
+        <title>{{ SITENAME }}</title>
+        <link rel="shortcut icon" href="{{ FAVICON }}" type="image/x-icon" />
+        <link rel="icon" href="{{ FAVICON }}" type="image/x-icon" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="css/{{ CSS_FILE }}"
+        />
+    </head>
+    <body>
+        {% include "_header.html" %}
+        {% block content %} {% endblock %}
+        {% include "_footer.html" %}
+        <script
+           src="https://kit.fontawesome.com/39e34b83e1.js"
+           crossorigin="anonymous">
+        </script>
+        {% include "_analytics.html" %}
+    </body>
+</html>
