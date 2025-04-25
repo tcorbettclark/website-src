@@ -30,10 +30,8 @@ async function start_hot_reloader() {
       // Anything else is an error, so report it.
       console.log(error.message);
     }
-    console.log(
-      `Hot reloading stopped. Is dev server running? Waiting for ${retry_period} seconds before trying again.`,
-    );
-    setTimeout(start_hot_reloader, retry_period * 1000);
+    alert("Hot reloading stopped. Is the dev server running?");
+    window.location.reload(true);
   }
 }
 
