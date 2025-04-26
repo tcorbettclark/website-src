@@ -15,9 +15,8 @@ The key features of my approach are:
 * Just code i.e. not another static site generator library! (see https://jamstack.org/generators/ ...)
 * Support writing and maintaining pages of content. No blog posts, tags, articles, Atom or RSS feeds etc.
 * All web artifacts are kept together in one directory tree.
-* Freely mix HTML with/without Jinja2 templates and Markdown with TOML frontmatter for metadata (also passed through Jinja2 templates).
-* Extra metadata provided to the Jinja templates e.g. for timestamps and to create path navigation.
-* Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
+* Markdown rendered to HTML, and then everything rendered with Jinja2
+* TODO Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
 * Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
 The build process works as follows:
@@ -32,17 +31,22 @@ The end result is a clean output directory ready for deployment.
 
 Every build is a clean build. No caching as plenty faster enough without complexity penalty or subtle gotchas.
 
-# TODO
+# TODO - content
 
-* Content: skills, interests, now page, tools
-
-* Move the explanation into one of the web pages, and link from here.
-
-* Remake favicon.ico
+* skills
+* now page
+* tools
+* this website - and link from here
+  * explain how I chose colour palette
 * Find a link to the PDF for my "Choosing an appropriate model for novelty detection" paper.
   See https://ieeexplore.ieee.org/document/607503
+
+# TODO - technical
+
+* Remake favicon.ico
+* Safari is looking for /apple-touch-icon-precomposed.png and /apple-touch-icon.png
 * Add Google analytics
-* Add a robots.txt file, and add a sitemap.xml
+* Add a sitemap.xml and update robots.txt file
   See https://thatware.co/xml-sitemap-creation-python/
   See https://michael-lisboa.medium.com/automate-your-sitemap-xml-with-python-and-deploy-it-as-a-cron-job-to-google-cloud-c5c4f986c734
   Note also need to submit to search engines (once)

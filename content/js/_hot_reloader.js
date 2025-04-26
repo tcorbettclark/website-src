@@ -1,11 +1,11 @@
 async function hot_reloader() {
-  console.log("Starting hot-reloader.");
+  console.log("Starting hot reloader.");
   waiting_for_reload = true;
   while (waiting_for_reload) {
     const options = {
       cache: "reload",
     };
-    response = await fetch("/hot-reloader", options);
+    const response = await fetch("/hot_reloader", options);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -35,7 +35,7 @@ async function start_hot_reloader() {
   }
 }
 
-// Only run the hot-reloader during development.
+// Only run the hot reloader during development.
 if (window.location.hostname == "localhost") {
   start_hot_reloader();
 }

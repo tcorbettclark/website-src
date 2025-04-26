@@ -1,5 +1,4 @@
-Title: About Me
-Status: published
+# About me
 
 One of my interests is AI (who isn't?!). In particular, I’m interested in continuing the work I did some 20 years ago on extracting explanations from Artificial Neural Networks as part of my DPhil (see [Publications](/pages/publications)), before co-founding a company and leading (as CTO) the creation of enterprise software systems for collecting and cleaning data for clinical trial research in the pharmaceutical sector.
 
