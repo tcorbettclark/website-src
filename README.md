@@ -31,6 +31,9 @@ The end result is a clean output directory ready for deployment.
 
 Every build is a clean build. No caching as plenty faster enough without complexity penalty or subtle gotchas.
 
+About half of the code is about logging.
+
+
 # TODO - content
 
 * skills
@@ -43,6 +46,7 @@ Every build is a clean build. No caching as plenty faster enough without complex
 
 # TODO - technical
 
+* See if it is easy/possible to preserve correct indentation using Jinja, even after includes and extends.
 * Remake favicon.ico
 * Safari is looking for /apple-touch-icon-precomposed.png and /apple-touch-icon.png
 * Add Google analytics

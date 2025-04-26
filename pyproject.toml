@@ -10,5 +10,6 @@ dependencies = [
     "markdown>=3.8",
     "toml>=0.10.2",
     "typogrify>=2.1.0",
+    "user-agents>=2.2.0",
     "watchfiles>=1.0.5",
 ]

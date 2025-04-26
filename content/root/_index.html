@@ -1,0 +1,21 @@
+{% extends "_base.html" %}
+{% block content %}
+<section class="section">
+    <div class="columns">
+        <div class="column">
+            <div class="box">
+                {% include "root/_career-profile.html" %}
+                {% include "root/_experience.html" %}
+                {% include "root/_education.html" %}
+                {% include "root/_projects.html" %}
+            </div>
+        </div>
+        <div class="column is-one-fifth">
+            <div class="box has-background-primary">
+                {% include "root/_profile.html" %}
+                {% include "root/_interests.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

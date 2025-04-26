@@ -7,14 +7,16 @@ import shutil
 import jinja2
 import markdown
 import toml
+import user_agents
 import watchfiles
 from aiohttp import web
+from aiohttp.abc import AbstractAccessLogger
 
 # Configuration.
 ROOT_DIR = pathlib.Path(__file__).parent
 CONTENT_DIR = ROOT_DIR / "content"
 OUTPUT_DIR = ROOT_DIR / "output"
-TEMPLATE_DATA_FILENAME = "_template_data.toml"
+TEMPLATE_DATA_FILENAME = "_config.toml"
 HOST = "localhost"
 PORT = 8000
 HOT_RELOADER_TIMEOUT = 30
@@ -125,6 +127,22 @@ def rebuild():
     create_xml_sitemap()
 
 
+class AccessLogger(AbstractAccessLogger):
+    # Use a hand-crafted httpio access logger to fully control the detail.
+    # In particular, we want to unpack the User-Agent string
+
+    def log(self, request, response, time):
+        ua = user_agents.parse(request.headers["User-Agent"])
+        browser = ua.browser.family
+        version = ua.browser.version_string
+        if version:
+            browser += "-" + version
+        device = ua.device.family
+        self.logger.info(
+            f"Client {browser} on {device} requested: {request.path}"
+        )
+
+
 async def run_server_and_rebuild_after_changes():
     reload_request_events = set()
 
@@ -149,8 +167,8 @@ async def run_server_and_rebuild_after_changes():
 
     runner = web.AppRunner(
         app,
+        access_log_class=AccessLogger,
         access_log=logger,
-        access_log_format="Web response HTTP %r %s %b",
         handle_signals=True,
     )
     await runner.setup()

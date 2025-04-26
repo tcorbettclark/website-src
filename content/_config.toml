@@ -1,8 +1,8 @@
-DEFAULT_LANG = "en"
 SITENAME = "Dr Timothy Corbett-Clark"
 SITEDESCRIPTION = "Personal website of Dr Timothy Corbett-Clark"
-
-CSS_FILE = "main.css"
+AUTHOR = "Timothy Corbett-Clark"
+GITHUB_URL = "https://github.com/tcorbettclark/tcorbettclark.github.io"
+COPYRIGHT_FOOTER = "Timothy Corbett-Clark, 2025"
 
 # TODO - sort/fix
 GOOGLE_ANALYTICS = "UA-6880945-2" # also the analytics.html template
@@ -12,14 +12,7 @@ MY_SHORT_NAME = "Tim C-C"
 MY_PIC = "img/me.jpg"
 MY_TAGLINE = "CTO, Researcher, Architect, Developer"
 
-
 MY_CAREER_SUMMARY = "TODO copy from LinkedIn"
-
-AUTHOR = "Timothy Corbett-Clark"
-GITHUB_URL = "https://github.com/tcorbettclark/tcorbettclark.github.io"
-COPYRIGHT_FOOTER = "Timothy Corbett-Clark, 2025"
-FAVICON = "img/favicon.ico"                                             # TODO make a nice black and white version of this
-
 
 [[MY_INTERESTS]]
 topic = "Maths"
