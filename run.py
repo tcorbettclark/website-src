@@ -158,7 +158,13 @@ async def run_server_and_rebuild_after_changes():
         except asyncio.TimeoutError:
             logger.info("Hot reloader sent timeout action")
             response = web.Response(text="Timeout")
-        reload_request_events.remove(e)
+        except asyncio.CancelledError:
+            # Client cancelled e.g. from reload or page navigation.
+            # We were informed because handler_cancellation=True in AppRunner.
+            # Just swallow and allow cleanup in the finally block.
+            pass
+        finally:
+            reload_request_events.remove(e)
         return response
 
     app = web.Application()
@@ -170,6 +176,7 @@ async def run_server_and_rebuild_after_changes():
         access_log_class=AccessLogger,
         access_log=logger,
         handle_signals=True,
+        handler_cancellation=True,
     )
     await runner.setup()
     site = web.TCPSite(runner, host=HOST, port=PORT)

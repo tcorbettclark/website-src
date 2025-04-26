@@ -1,9 +1,14 @@
 async function hot_reloader() {
   console.log("Starting hot reloader.");
+  const controller = new AbortController();
+  addEventListener("beforeunload", (event) => {
+    controller.abort();
+  });
   waiting_for_reload = true;
   while (waiting_for_reload) {
     const options = {
       cache: "reload",
+      signal: controller.signal,
     };
     const response = await fetch("/hot_reloader", options);
     if (!response.ok) {
@@ -19,19 +24,23 @@ async function hot_reloader() {
 }
 
 async function start_hot_reloader() {
-  const retry_period = 5;
   try {
     await hot_reloader();
   } catch (error) {
-    if (error.message == "Load failed") {
-      // After requesting a reload but before it happens, the fetch on Safari sometimes
-      // throws this error. We don't care, but it produces console noise, so swallow it.
-    } else {
-      // Anything else is an error, so report it.
-      console.log(error.message);
+    switch (error.message) {
+      case "Load failed":
+        alert("Hot reloading stopped. Is the dev server running?");
+        window.location.reload(true);
+        break;
+      case "Fetch is aborted":
+        // Assume this occurs because we aborted the fetch using the beforeunload event.
+        // So swallow and do nothing.
+        break;
+      default:
+        // Anything else is an error, so report it and re-raise.
+        console.log(error);
+        throw error;
     }
-    alert("Hot reloading stopped. Is the dev server running?");
-    window.location.reload(true);
   }
 }
 
