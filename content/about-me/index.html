@@ -1,11 +1,4 @@
-{% extends "_base.html" %}
-{% block content %}
-<section class="section">
-    <div class="box">
-        <h1 class="title">About me</h1>
-        <div class="content">
-        {% include "about-me/_main.html" %}
-        </div>
-    </div>
-</section>
+{% extends "_page.html" %}
+{% block page %}
+            {% include "about-me/_about-me.html" indent content %}
 {% endblock %}

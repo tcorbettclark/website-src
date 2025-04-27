@@ -1,1 +1,18 @@
-{% include "root/_index.html" %}
+{% extends "_base.html" %}
+{% block content %}
+        <section class="section">
+            <div class="columns">
+                <div class="column">
+                    <div class="box">
+                        <ul>
+                            <li><a href="/cv/index.html">Professional career</a></li>
+                            <li><a href="/about-me/index.html">About me</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column is-one-fifth">
+                    {% include "_profile.html" indent content -%}
+                </div>
+            </div>
+        </section>
+{% endblock %}

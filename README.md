@@ -58,7 +58,7 @@ About half of the code is about logging.
   See https://michael-lisboa.medium.com/automate-your-sitemap-xml-with-python-and-deploy-it-as-a-cron-job-to-google-cloud-c5c4f986c734
   Note also need to submit to search engines (once)
 * Typogrify - its added to uv. Do I need it??
-
+* Check how well screens print to PDF, e.g. my CV page
 
 
 I'm using the free plan of FontAwesome, which has a monthly limit of 10,000 views. Login to fontawesome.com to see usage.
