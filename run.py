@@ -4,13 +4,14 @@ import os
 import pathlib
 import shutil
 
+import aiohttp
+import aiohttp.abc
+import aiohttp.web
 import jinja2
 import markdown
 import toml
 import user_agents
 import watchfiles
-from aiohttp import web
-from aiohttp.abc import AbstractAccessLogger
 
 # Configuration.
 ROOT_DIR = pathlib.Path(__file__).parent
@@ -19,7 +20,6 @@ OUTPUT_DIR = ROOT_DIR / "output"
 TEMPLATE_DATA_FILENAME = "_config.toml"
 HOST = "localhost"
 PORT = 8000
-HOT_RELOADER_TIMEOUT = 30
 
 
 # Logging.
@@ -36,12 +36,13 @@ def is_working_filename(filename):
 
 
 def is_template_filename(filename):
+    # A template filename is a non-working filename with a .html extension.
     p = pathlib.Path(filename)
     return p.suffix == ".html" and not is_working_filename(p)
 
 
 def rpr(filename):
-    """Return the Relative Path to Root. For tidy logging."""
+    """Return the Relative Path to Root. For tidier logging."""
     return pathlib.Path(filename).relative_to(ROOT_DIR)
 
 
@@ -51,7 +52,7 @@ def create_fresh_output_directory():
         shutil.rmtree(OUTPUT_DIR)
     shutil.copytree(CONTENT_DIR, OUTPUT_DIR)
     logger.info(
-        f"Created fresh output directory: {OUTPUT_DIR} ({rpr(OUTPUT_DIR)})"
+        f"Cloned content into fresh output directory: {OUTPUT_DIR} ({rpr(OUTPUT_DIR)})"
     )
 
 
@@ -125,11 +126,12 @@ def rebuild():
     render_templates()
     remove_working_files()
     create_xml_sitemap()
+    logger.info(f"Rebuilt all files in: {rpr(OUTPUT_DIR)}")
 
 
-class AccessLogger(AbstractAccessLogger):
+class AccessLogger(aiohttp.abc.AbstractAccessLogger):
     # Use a hand-crafted httpio access logger to fully control the detail.
-    # In particular, we want to unpack the User-Agent string
+    # In particular, to unpack the User-Agent string.
 
     def log(self, request, response, time):
         ua = user_agents.parse(request.headers["User-Agent"])
@@ -139,39 +141,54 @@ class AccessLogger(AbstractAccessLogger):
             browser += "-" + version
         device = ua.device.family
         self.logger.info(
-            f"Client {browser} on {device} requested: {request.path}"
+            f"Completed request from client {browser} on {device}: {request.path}"
         )
 
 
+async def get_changes():
+    async for changes in watchfiles.awatch(CONTENT_DIR):
+        for change, filename in list(changes):
+            if change == watchfiles.Change.added:
+                logger.info(f"Noticed new file added: {rpr(filename)}")
+            elif change == watchfiles.Change.deleted:
+                logger.info(f"Noticed existing file deleted: {rpr(filename)}")
+            elif change == watchfiles.Change.modified:
+                logger.info(f"Noticed existing file modified: {rpr(filename)}")
+        yield changes
+
+
 async def run_server_and_rebuild_after_changes():
-    reload_request_events = set()
+    web_sockets = set()  # TODO move to app["web_sockets"]
 
-    async def hot_reloader_handler(request):
-        e = asyncio.Event()
-        reload_request_events.add(e)
-        response = web.Response(text="Unknown")
+    async def websocket_handler(request):
+        ws = aiohttp.web.WebSocketResponse()
+        web_sockets.add(ws)
+        await ws.prepare(request)
+        logger.info("Started new hot reloader websocket")
         try:
-            logger.info("Started new hot reloader")
-            await asyncio.wait_for(e.wait(), HOT_RELOADER_TIMEOUT)
-            logger.info("Hot reloader sent reload action")
-            response = web.Response(text="Reload")
-        except asyncio.TimeoutError:
-            logger.info("Hot reloader sent timeout action")
-            response = web.Response(text="Timeout")
-        except asyncio.CancelledError:
-            # Client cancelled e.g. from reload or page navigation.
-            # We were informed because handler_cancellation=True in AppRunner.
-            # Just swallow and allow cleanup in the finally block.
-            pass
+            async for msg in ws:
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    if msg.data == "close":
+                        await ws.close()
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    print(
+                        "ws connection closed with exception %s"
+                        % ws.exception()
+                    )
+            logger.info("Closed hot reloader websocket")
         finally:
-            reload_request_events.remove(e)
-        return response
+            web_sockets.remove(ws)
+        return ws
 
-    app = web.Application()
-    app.router.add_static("/", path=OUTPUT_DIR, show_index=True)
-    app.router.add_route("GET", "/hot_reloader", hot_reloader_handler)
+    async def send_reload_action():
+        logger.info(f"Signalling to {len(web_sockets)} hot reloaders")
+        for ws in list(web_sockets):
+            await ws.send_str("reload")
 
-    runner = web.AppRunner(
+    app = aiohttp.web.Application()
+    app.router.add_static("/", OUTPUT_DIR, show_index=True)
+    app.router.add_get("/ws", websocket_handler)
+    runner = aiohttp.web.AppRunner(
         app,
         access_log_class=AccessLogger,
         access_log=logger,
@@ -179,33 +196,15 @@ async def run_server_and_rebuild_after_changes():
         handler_cancellation=True,
     )
     await runner.setup()
-    site = web.TCPSite(runner, host=HOST, port=PORT)
+    site = aiohttp.web.TCPSite(runner, host=HOST, port=PORT)
     logger.info(f"Starting local server on http://{HOST}:{PORT}")
     logger.info(f"Serving files from: {rpr(OUTPUT_DIR)}")
     logger.info(f"Watching for changes in: {rpr(CONTENT_DIR)}")
     try:
         await site.start()
-        async for changes in watchfiles.awatch(CONTENT_DIR):
-            for change, filename in list(changes):
-                if change == watchfiles.Change.added:
-                    logger.info(f"Noticed new file added: {rpr(filename)}")
-                elif change == watchfiles.Change.deleted:
-                    logger.info(
-                        f"Noticed existing file deleted: {rpr(filename)}"
-                    )
-                elif change == watchfiles.Change.modified:
-                    logger.info(
-                        f"Noticed existing file modified: {rpr(filename)}"
-                    )
+        async for _ in get_changes():
             rebuild()
-            logger.info(
-                f"Continuing to serve (updated) files from: {rpr(OUTPUT_DIR)}"
-            )
-            logger.info(
-                f"Signalling to {len(reload_request_events)} hot reloaders"
-            )
-            for e in list(reload_request_events):
-                e.set()
+            await send_reload_action()
     finally:
         logger.info("Stopping server")
         await runner.cleanup()
