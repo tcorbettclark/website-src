@@ -73,7 +73,10 @@ def render_markdown():
 
 def render_templates():
     data = toml.load(OUTPUT_DIR / TEMPLATE_DATA_FILENAME)
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(OUTPUT_DIR))
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(OUTPUT_DIR),
+        extensions=["jinja2_workarounds.MultiLineInclude"],
+    )
     template_filenames = env.list_templates(filter_func=is_template_filename)
     for template_filename in template_filenames:
         template = env.get_template(template_filename)
