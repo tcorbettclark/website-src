@@ -17,30 +17,32 @@ To update content, rebuild, and deploy:
   ...update git repo and push to github
 ```
 
+Philosphy - don't make the reader assemble blog timeline of thoughts, but make that the writer's responsibility. To see recent changes, see XXXX.
+
+
 The key features of my approach are:
 
 * Just code i.e. not another static site generator library! (see https://jamstack.org/generators/ ...)
 * Support writing and maintaining pages of content. No blog posts, tags, articles, Atom or RSS feeds etc.
-* All web artifacts are kept together in one directory tree.
-* Markdown rendered to HTML, and then everything rendered with Jinja2
+* All files are kept together in one directory tree. At the start of the build process, this is cloned.
+* No files are moved around, but working files are deleted (so more of a subtractive approach than a move/additive one.)
+* Organising and templating HTML using Jinja2.
+* Simple Jinja2 filter to allow content to be written using Markdown (in plain .md files).
 * TODO Automatic generation of sitemap (both HTML and xml file) from the content (for SEO).
+* Html-tidy of all output to both validate and keep everything tidy.
 * Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
 The build process works as follows:
 
 1 Clone the content directory into a new output directory.
 1 Using only the output directory
-1.1 Convert each markdown file (`*.md`) to an HTML (`*.html`) file of same name, optionally applying Jinja2 template specified in the frontmatter.
 1.1 Apply Jinja2 templates to all HTML files which do not start with an underscore, and render back in place.
 1.1 Delete all working files and directories (anything with a leading underscore in the path segment).
+1.1 Run html-tidy over all HTML files to validate and fix indentation.
 
 The end result is a clean output directory ready for deployment.
 
 Every build is a clean build. No caching as plenty faster enough without complexity penalty or subtle gotchas.
-
-About half of the code is about logging.
-
-Run through HTML Tidy to fix indents. Not only checks validity and warns of issues, but also avoids the need to try hard to generate tidy HTML during the templating generation phase.
 
 # TODO - content
 
@@ -52,7 +54,7 @@ Run through HTML Tidy to fix indents. Not only checks validity and warns of issu
 * Find a link to the PDF for my "Choosing an appropriate model for novelty detection" paper.
   See https://ieeexplore.ieee.org/document/607503
 * My computer setup
-
+* Add "Update log" to list recent and notable updates. Maybe...
 
 # TODO - technical
 

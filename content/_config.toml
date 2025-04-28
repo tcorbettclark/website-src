@@ -15,16 +15,20 @@ MY_TAGLINE = "CTO, Researcher, Architect, Developer"
 MY_CAREER_SUMMARY = "TODO copy from LinkedIn"
 
 [[MY_INTERESTS]]
+topic = "Programming"
+fa_class = "fa-code"
+
+[[MY_INTERESTS]]
 topic = "Maths"
 fa_class = "fa-shapes"
 
 [[MY_INTERESTS]]
-topic = "Philosophy"
-fa_class = "fa-lightbulb"
-
-[[MY_INTERESTS]]
 topic = "AI/ML"
 fa_class = "fa-share-nodes"
+
+[[MY_INTERESTS]]
+topic = "Philosophy"
+fa_class = "fa-lightbulb"
 
 [[MY_INTERESTS]]
 topic = "Music"
@@ -37,10 +41,6 @@ fa_class = "fa-person-skiing"
 [[MY_INTERESTS]]
 topic = "Chess"
 fa_class = "fa-chess-knight"
-
-[[MY_INTERESTS]]
-topic = "Programming"
-fa_class = "fa-code"
 
 [[MY_INTERESTS]]
 topic = "Writing"
