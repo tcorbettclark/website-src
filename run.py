@@ -8,10 +8,12 @@ import aiohttp
 import aiohttp.abc
 import aiohttp.web
 import jinja2
-import markdown
+import markdown_it
+import tidy
 import toml
 import user_agents
 import watchfiles
+from mdit_py_plugins.footnote import footnote_plugin as markdown_footnote_plugin
 
 # Configuration.
 ROOT_DIR = pathlib.Path(__file__).parent
@@ -56,33 +58,36 @@ def create_fresh_output_directory():
     )
 
 
-def render_markdown():
-    md = markdown.Markdown()
-    for root, dirs, files in OUTPUT_DIR.walk():
-        for name in files:
-            if name.endswith(".md"):
-                md_filename = root / name
-                html_filename = md_filename.with_suffix(".html")
-                md.convertFile(
-                    input=str(md_filename),
-                    output=str(html_filename),
-                )
-                md_filename.unlink()
-                logger.info(f"Rendered markdown in: {rpr(md_filename)}")
+@jinja2.pass_context
+def convert_markdown(context, value):
+    if value.startswith(".") or "/" not in value:
+        # Relative to template file.
+        markdown_filename = (
+            OUTPUT_DIR / pathlib.Path(context.name).parent / value
+        )
+    else:
+        # Relative to main content root.
+        markdown_filename = OUTPUT_DIR / value
+    md = markdown_it.MarkdownIt(
+        "commonmark", {"typographer": True, "linkify": True}
+    )
+    md.use(markdown_footnote_plugin)
+    md.enable(["replacements", "smartquotes", "linkify", "table"])
+    logger.info(f"Converted markdown from: {rpr(markdown_filename)}")
+    with open(markdown_filename, "r") as f:
+        return md.render(f.read())
 
 
 def render_templates():
-    data = toml.load(OUTPUT_DIR / TEMPLATE_DATA_FILENAME)
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(OUTPUT_DIR),
-        extensions=["jinja2_workarounds.MultiLineInclude"],
-    )
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(OUTPUT_DIR))
+    env.globals.update(toml.load(OUTPUT_DIR / TEMPLATE_DATA_FILENAME))
+    env.filters["markdown"] = convert_markdown
     template_filenames = env.list_templates(filter_func=is_template_filename)
     for template_filename in template_filenames:
         template = env.get_template(template_filename)
         p = OUTPUT_DIR / template_filename
         with open(p, "w") as f:
-            f.write(template.render(data))
+            f.write(template.render())
         logger.info(f"Rendered template: {rpr(p)}")
 
 
@@ -107,6 +112,33 @@ def remove_working_files():
     )
 
 
+def tidy_html_files():
+    for root, dirs, files in OUTPUT_DIR.walk():
+        for name in files:
+            p = root / name
+            if p.suffix == ".html":
+                doc = tidy.parse(
+                    str(p),
+                    indent="yes",
+                    wrap=120,
+                    drop_empty_elements="no",
+                    wrap_sections="no",
+                )
+                errors = doc.get_errors()
+                if errors:
+                    for e in errors:
+                        logger.info(f"Html-tidy found problem in {rpr(p)}: {e}")
+                    output_filename = p.with_suffix(".tidy.html")
+                    logger.info(
+                        f"Not updating file, but see tidy version in {output_filename}"
+                    )
+                else:
+                    output_filename = p
+                    logger.info(f"Html-tidy ok: {rpr(p)}")
+                with open(output_filename, "w") as fp:
+                    fp.write(doc.gettext())
+
+
 def create_xml_sitemap():
     pass
     # logger.info("Creating XML sitemap")
@@ -125,9 +157,9 @@ def create_xml_sitemap():
 
 def rebuild():
     create_fresh_output_directory()
-    render_markdown()
     render_templates()
     remove_working_files()
+    tidy_html_files()
     create_xml_sitemap()
     logger.info(f"Rebuilt all files in: {rpr(OUTPUT_DIR)}")
 

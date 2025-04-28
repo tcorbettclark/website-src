@@ -2,6 +2,13 @@
 
 My home page is built using a simple home grown static site generator.
 
+Environment
+
+Need html-tidy (https://www.html-tidy.org)
+brew install tidy-html5
+And make sure that the library can be found on the library search path.
+For example, ensure DYLD_LIBRARY_PATH includes /usr/local/lib/
+
 To update content, rebuild, and deploy:
 ```
   uv run python main.py
@@ -33,6 +40,7 @@ Every build is a clean build. No caching as plenty faster enough without complex
 
 About half of the code is about logging.
 
+Run through HTML Tidy to fix indents. Not only checks validity and warns of issues, but also avoids the need to try hard to generate tidy HTML during the templating generation phase.
 
 # TODO - content
 

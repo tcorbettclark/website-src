@@ -1,11 +1,3 @@
-Title: My Machine Learning tastes and principles
-Date: 2019-01-01
-Category: machine-learning
-Tags: machine-learning, principles
-Slug: my-ml-tastes
-Status: published
-Summary: A description of my Machine Learning tastes in the form of some principles I endeavour to follow
-
 Whenever I read material on-line, one of the first things I want to know are the tastes and style of the author. So with that in mind, here are mine.
 
 Firstly, I’m a computer scientist and engineer, with an amateur love of mathematics.
