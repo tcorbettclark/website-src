@@ -1,4 +1,5 @@
 import asyncio
+import glob
 import logging
 import os
 import pathlib
@@ -15,16 +16,10 @@ import user_agents
 import watchfiles
 from mdit_py_plugins.footnote import footnote_plugin as markdown_footnote_plugin
 
-# Configuration.
 ROOT_DIR = pathlib.Path(__file__).parent
-CONTENT_DIR = ROOT_DIR / "content"
-OUTPUT_DIR = ROOT_DIR / "output"
-TEMPLATE_DATA_FILENAME = "_config.toml"
-HOST = "localhost"
-PORT = 8000
 
 
-# Logging.
+# Configure Logging.
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logging.getLogger("watchfiles.main").setLevel(
@@ -32,139 +27,156 @@ logging.getLogger("watchfiles.main").setLevel(
 )  # Stop watchfiles from logging file changes, as we do it instead.
 
 
-def is_working_filename(filename):
-    # A working file has a name which starts with either an underscore or a dot.
-    return pathlib.Path(filename).name[0] in ("_", ".")
+def log(message, *args):
+    # Make all pathlib.Path args relative to ROOT_DIR.
+    tmp = [
+        str(pathlib.Path(arg).relative_to(ROOT_DIR))
+        if isinstance(arg, pathlib.Path)
+        else arg
+        for arg in args
+    ]
+    logger.info(message.format(*tmp))
 
 
-def is_template_filename(filename):
-    # A template filename is a non-working filename with a .html extension.
-    p = pathlib.Path(filename)
-    return p.suffix == ".html" and not is_working_filename(p)
+class Builder:
+    def __init__(self, content_dir, output_dir):
+        self.output_dir = output_dir
+        self.content_dir = content_dir
 
+    def _is_working_filename(self, filename):
+        # A working file has a name which starts with either an underscore or a dot.
+        return pathlib.Path(filename).name[0] in ("_", ".")
 
-def rpr(filename):
-    """Return the Relative Path to Root. For tidier logging."""
-    return pathlib.Path(filename).relative_to(ROOT_DIR)
+    def _is_template_filename(self, filename):
+        # A template filename is a non-working filename with a .html extension.
+        p = pathlib.Path(filename)
+        return p.suffix == ".html" and not self._is_working_filename(p)
 
+    def create_fresh_output_directory(self):
+        log(f"Using content in: {self.content_dir} ({{}})", self.content_dir)
 
-def create_fresh_output_directory():
-    logger.info(f"Using content in: {CONTENT_DIR} ({rpr(CONTENT_DIR)})")
-    if os.path.exists(OUTPUT_DIR):
-        shutil.rmtree(OUTPUT_DIR)
-    shutil.copytree(CONTENT_DIR, OUTPUT_DIR)
-    logger.info(
-        f"Cloned content into fresh output directory: {OUTPUT_DIR} ({rpr(OUTPUT_DIR)})"
-    )
-
-
-@jinja2.pass_context
-def convert_markdown(context, value):
-    if value.startswith(".") or "/" not in value:
-        # Relative to template file.
-        markdown_filename = (
-            OUTPUT_DIR / pathlib.Path(context.name).parent / value
+        if os.path.exists(self.output_dir):
+            shutil.rmtree(self.output_dir)
+        shutil.copytree(self.content_dir, self.output_dir)
+        log(
+            f"Cloned content into fresh output directory: {self.output_dir} ({{}})",
+            self.output_dir,
         )
-    else:
-        # Relative to main content root.
-        markdown_filename = OUTPUT_DIR / value
-    md = markdown_it.MarkdownIt(
-        "commonmark", {"typographer": True, "linkify": True}
-    )
-    md.use(markdown_footnote_plugin)
-    md.enable(["replacements", "smartquotes", "linkify", "table"])
-    logger.info(f"Converted markdown from: {rpr(markdown_filename)}")
-    with open(markdown_filename, "r") as f:
-        return md.render(f.read())
 
+    def _add_template_data(self, env):
+        for filename in glob.glob(
+            "**.toml", root_dir=self.output_dir, recursive=True
+        ):
+            log("Reading template data from: {}", filename)
+            data = toml.load(self.output_dir / filename)
+            env.globals.update(data)
 
-def render_templates():
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(OUTPUT_DIR))
-    env.globals.update(toml.load(OUTPUT_DIR / TEMPLATE_DATA_FILENAME))
-    env.filters["markdown"] = convert_markdown
-    template_filenames = env.list_templates(filter_func=is_template_filename)
-    for template_filename in template_filenames:
-        template = env.get_template(template_filename)
-        p = OUTPUT_DIR / template_filename
-        with open(p, "w") as f:
-            f.write(template.render())
-        logger.info(f"Rendered template: {rpr(p)}")
-
-
-def remove_working_files():
-    n_files = 0
-    n_dirs = 0
-    for root, dirs, files in OUTPUT_DIR.walk(top_down=False):
-        for name in files:
-            p = root / name
-            if is_working_filename(p):
-                n_files += 1
-                logger.debug(f"Removing working file: {rpr(p)}")
-                p.unlink()
-        for name in dirs:
-            p = root / name
-            if len(list(p.iterdir())) == 0:
-                n_dirs += 1
-                logger.debug(f"Removing empty directory: {rpr(p)}")
-                os.rmdir(p)
-    logger.info(
-        f"Removed {n_files} working files and {n_dirs} empty directories from output directory"
-    )
-
-
-def tidy_html_files():
-    for root, dirs, files in OUTPUT_DIR.walk():
-        for name in files:
-            p = root / name
-            if p.suffix == ".html":
-                doc = tidy.parse(
-                    str(p),
-                    indent="yes",
-                    wrap=120,
-                    drop_empty_elements="no",
-                    wrap_sections="no",
+    def _add_markdown_filter(self, env):
+        @jinja2.pass_context
+        def convert_markdown(context, value):
+            if value.startswith(".") or "/" not in value:
+                # Relative to template file.
+                markdown_filename = (
+                    self.output_dir / pathlib.Path(context.name).parent / value
                 )
-                errors = doc.get_errors()
-                if errors:
-                    for e in errors:
-                        logger.info(f"Html-tidy found problem in {rpr(p)}: {e}")
-                    output_filename = p.with_suffix(".tidy.html")
-                    logger.info(
-                        f"Not updating file, but see tidy version in {output_filename}"
+            else:
+                # Relative to main content root.
+                markdown_filename = self.output_dir / value
+            md = markdown_it.MarkdownIt(
+                "commonmark", {"typographer": True, "linkify": True}
+            )
+            md.use(markdown_footnote_plugin)
+            md.enable(["replacements", "smartquotes", "linkify", "table"])
+            log("Converted markdown from: {}", markdown_filename)
+            with open(markdown_filename, "r") as f:
+                return md.render(f.read())
+
+        env.filters["markdown"] = convert_markdown
+
+    def render_templates(self):
+        loader = jinja2.FileSystemLoader(self.output_dir)
+        env = jinja2.Environment(loader=loader)
+        self._add_template_data(env)
+        self._add_markdown_filter(env)
+        template_filenames = env.list_templates(
+            filter_func=self._is_template_filename
+        )
+        for template_filename in template_filenames:
+            template = env.get_template(template_filename)
+            p = self.output_dir / template_filename
+            with open(p, "w") as f:
+                f.write(template.render())
+            log("Rendered template: {}", p)
+
+    def remove_working_files(self):
+        n_files = 0
+        n_dirs = 0
+        for root, dirs, files in self.output_dir.walk(top_down=False):
+            for name in files:
+                p = root / name
+                if self._is_working_filename(p):
+                    n_files += 1
+                    p.unlink()
+            for name in dirs:
+                p = root / name
+                if len(list(p.iterdir())) == 0:
+                    n_dirs += 1
+                    os.rmdir(p)
+        log(
+            f"Removed {n_files} working files and {n_dirs} empty directories from output directory"
+        )
+
+    def tidy_html_files(self):
+        for root, dirs, files in self.output_dir.walk():
+            for name in files:
+                p = root / name
+                if p.suffix == ".html":
+                    doc = tidy.parse(
+                        str(p),
+                        indent="yes",
+                        wrap=120,
+                        drop_empty_elements="no",
+                        wrap_sections="no",
                     )
-                else:
-                    output_filename = p
-                    logger.info(f"Html-tidy ok: {rpr(p)}")
-                with open(output_filename, "w") as fp:
-                    fp.write(doc.gettext())
+                    errors = doc.get_errors()
+                    if errors:
+                        for e in errors:
+                            log(f"Html-tidy found problem in {{}}: {e}", p)
+                        output_filename = p.with_suffix(".tidy.html")
+                        log(
+                            "Not updating file, but see tidy version in {}",
+                            output_filename,
+                        )
+                    else:
+                        output_filename = p
+                        log("Html-tidy ok: {}", p)
+                    with open(output_filename, "w") as fp:
+                        fp.write(doc.gettext())
+
+    def create_xml_sitemap(self):
+        log("Created XML sitemap - TODO!!")
+        # sitemap = Sitemap()
+        # for (root, dirs, files) in OUTPUT_DIR.walk(top_down=False):
+        #     for name in files:
+        #         p = root / name
+        #         if _is_working_filename(p):
+        #             continue
+        #         if p.suffix == ".html":
+        #             sitemap.add(p.relative_to(OUTPUT_DIR).as_posix())
+        # with open(OUTPUT_DIR / "sitemap.xml", "w") as f:
+        #     f.write(sitemap.to_string())
+        # log("Created XML sitemap")
+
+    def rebuild(self):
+        self.create_fresh_output_directory()
+        self.render_templates()
+        self.remove_working_files()
+        self.tidy_html_files()
+        self.create_xml_sitemap()
+        log("Rebuilt all files in: {}", self.output_dir)
 
 
-def create_xml_sitemap():
-    pass
-    # logger.info("Creating XML sitemap")
-    # sitemap = Sitemap()
-    # for (root, dirs, files) in OUTPUT_DIR.walk(top_down=False):
-    #     for name in files:
-    #         p = root / name
-    #         if is_working_filename(p):
-    #             continue
-    #         if p.suffix == ".html":
-    #             sitemap.add(p.relative_to(OUTPUT_DIR).as_posix())
-    # with open(OUTPUT_DIR / "sitemap.xml", "w") as f:
-    #     f.write(sitemap.to_string())
-    # logger.info("Created XML sitemap")
-
-
-def rebuild():
-    create_fresh_output_directory()
-    render_templates()
-    remove_working_files()
-    tidy_html_files()
-    create_xml_sitemap()
-    logger.info(f"Rebuilt all files in: {rpr(OUTPUT_DIR)}")
-
-
-class AccessLogger(aiohttp.abc.AbstractAccessLogger):
+class _ServerAccessLogger(aiohttp.abc.AbstractAccessLogger):
     # Use a hand-crafted httpio access logger to fully control the detail.
     # In particular, to unpack the User-Agent string.
 
@@ -175,79 +187,118 @@ class AccessLogger(aiohttp.abc.AbstractAccessLogger):
         if version:
             browser += "-" + version
         device = ua.device.family
-        self.logger.info(
+        log(
             f"Completed request from client {browser} on {device}: {request.path}"
         )
 
 
-async def get_changes():
-    async for changes in watchfiles.awatch(CONTENT_DIR):
-        for change, filename in list(changes):
-            if change == watchfiles.Change.added:
-                logger.info(f"Noticed new file added: {rpr(filename)}")
-            elif change == watchfiles.Change.deleted:
-                logger.info(f"Noticed existing file deleted: {rpr(filename)}")
-            elif change == watchfiles.Change.modified:
-                logger.info(f"Noticed existing file modified: {rpr(filename)}")
-        yield changes
+class Server:
+    host = "localhost"
+    port = 8000
 
+    def __init__(self, directory):
+        self.directory = directory
+        self.web_sockets = set()
 
-async def run_server_and_rebuild_after_changes():
-    web_sockets = set()  # TODO move to app["web_sockets"]
-
-    async def websocket_handler(request):
-        ws = aiohttp.web.WebSocketResponse()
-        web_sockets.add(ws)
-        await ws.prepare(request)
-        logger.info("Started new hot reloader websocket")
-        try:
-            async for msg in ws:
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    if msg.data == "close":
-                        await ws.close()
-                elif msg.type == aiohttp.WSMsgType.ERROR:
-                    print(
-                        "ws connection closed with exception %s"
-                        % ws.exception()
-                    )
-            logger.info("Closed hot reloader websocket")
-        finally:
-            web_sockets.remove(ws)
-        return ws
-
-    async def send_reload_action():
-        logger.info(f"Signalling to {len(web_sockets)} hot reloaders")
-        for ws in list(web_sockets):
+    async def signal_hot_reloaders(self):
+        log(f"Signalling to {len(self.web_sockets)} hot reloaders")
+        for ws in list(self.web_sockets):
             await ws.send_str("reload")
 
-    app = aiohttp.web.Application()
-    app.router.add_static("/", OUTPUT_DIR, show_index=True)
-    app.router.add_get("/ws", websocket_handler)
-    runner = aiohttp.web.AppRunner(
-        app,
-        access_log_class=AccessLogger,
-        access_log=logger,
-        handle_signals=True,
-        handler_cancellation=True,
-    )
-    await runner.setup()
-    site = aiohttp.web.TCPSite(runner, host=HOST, port=PORT)
-    logger.info(f"Starting local server on http://{HOST}:{PORT}")
-    logger.info(f"Serving files from: {rpr(OUTPUT_DIR)}")
-    logger.info(f"Watching for changes in: {rpr(CONTENT_DIR)}")
-    try:
+    async def _close_hot_reloaders(self):
+        log(f"Closing {len(self.web_sockets)} hot reloaders")
+        for ws in list(self.web_sockets):
+            await ws.close()
+
+    async def start(self):
+        async def websocket_handler(request):
+            ws = aiohttp.web.WebSocketResponse()
+            self.web_sockets.add(ws)
+            await ws.prepare(request)
+            log("Started new hot reloader websocket")
+            try:
+                async for msg in ws:
+                    if msg.type == aiohttp.WSMsgType.TEXT:
+                        if msg.data == "close":
+                            await ws.close()
+                    elif msg.type == aiohttp.WSMsgType.ERROR:
+                        print(
+                            "ws connection closed with exception %s"
+                            % ws.exception()
+                        )
+                log("Closed hot reloader websocket")
+            finally:
+                self.web_sockets.remove(ws)
+            return ws
+
+        app = aiohttp.web.Application()
+        app.router.add_static("/", self.directory, show_index=True)
+        app.router.add_get("/ws", websocket_handler)
+        self._runner = aiohttp.web.AppRunner(
+            app,
+            access_log_class=_ServerAccessLogger,
+            access_log=logger,
+            handle_signals=False,
+            handler_cancellation=True,
+        )
+        await self._runner.setup()
+        site = aiohttp.web.TCPSite(self._runner, self.host, self.port)
+        log(f"Starting local server on http://{self.host}:{self.port}")
+        log("Serving files from: {}", self.directory)
         await site.start()
-        async for _ in get_changes():
-            rebuild()
-            await send_reload_action()
-    finally:
-        logger.info("Stopping server")
-        await runner.cleanup()
+
+    async def stop(self):
+        log("Stopping server")
+        await self._close_hot_reloaders()
+        await self._runner.cleanup()
+
+
+class Watcher:
+    def __init__(self, directory):
+        self.directory = directory
+        self._change_event = asyncio.Event()
+
+    async def _start(self):
+        log("Watching for changes in: {}", self.directory)
+        async for changes in watchfiles.awatch(self.directory):
+            for change, filename in list(changes):
+                if change == watchfiles.Change.added:
+                    log("Noticed file added: {}", filename)
+                elif change == watchfiles.Change.deleted:
+                    log("Noticed file deleted: {}", filename)
+                elif change == watchfiles.Change.modified:
+                    log("Noticed file modified: {}", filename)
+            self._change_event.set()
+
+    async def start(self):
+        return asyncio.create_task(self._start())
+
+    async def wait_for_change(self):
+        await self._change_event.wait()
+        self._change_event.clear()
 
 
 async def main():
-    rebuild()
-    await run_server_and_rebuild_after_changes()
+    content_dir = ROOT_DIR / "content"
+    output_dir = ROOT_DIR / "output"
+
+    builder = Builder(content_dir, output_dir)
+    watcher = Watcher(content_dir)
+    server = Server(output_dir)
+
+    await watcher.start()
+    await server.start()
+    try:
+        while True:
+            builder.rebuild()
+            await server.signal_hot_reloaders()
+            await watcher.wait_for_change()
+    except asyncio.CancelledError:
+        # asyncio raises CancelledError on ctrl-c signal.
+        # See https://docs.python.org/3/library/asyncio-runner.html#handling-keyboard-interruption
+        # We take responsibility for cleanup and swallow the exception.
+        await server.stop()
+        log("Bye")
 
 
 if __name__ == "__main__":
