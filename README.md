@@ -19,7 +19,6 @@ Mostly, see `output/maintaining_my_website.md`
 
 * Fix hot reloader on back/forward history (when dev tools closed)
 * Use the W3C Validator
-* Web manifest
 * Add Google analytics
 * Add a sitemap.xml and update robots.txt file
   See https://thatware.co/xml-sitemap-creation-python/
