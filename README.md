@@ -19,14 +19,12 @@ Mostly, see `output/maintaining_my_website.md`
 
 * Fix hot reloader on back/forward history (when dev tools closed)
 * Use the W3C Validator
-* Remake favicon.ico
-* Safari is looking for /apple-touch-icon-precomposed.png and /apple-touch-icon.png
+* Web manifest
 * Add Google analytics
 * Add a sitemap.xml and update robots.txt file
   See https://thatware.co/xml-sitemap-creation-python/
   See https://michael-lisboa.medium.com/automate-your-sitemap-xml-with-python-and-deploy-it-as-a-cron-job-to-google-cloud-c5c4f986c734
   Use git to see when files last changed.
   Note also need to submit to search engines (once)
-* Typogrify - its added to uv. Do I need it??
 * Check how well screens print to PDF, e.g. my CV page
 * I'm using the free plan of FontAwesome, which has a monthly limit of 10,000 views. Login to fontawesome.com to see usage. Different library?

@@ -37,9 +37,14 @@ The key features of my approach are:
 * Html-tidy of all output to both validate and keep everything tidy.
 * Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
+
+TODO: explain webmanifest file, especially for favicons
+
 ## Colour and styling
 
 TODO
+
+Simple "tcc" Favicon generated using https://favicon.io/favicon-generator/, using the same primary colour as configured in Bulma.
 
 ## Build process
 

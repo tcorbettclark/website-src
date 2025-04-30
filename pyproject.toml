@@ -10,7 +10,6 @@ dependencies = [
     "markdown-it-py[linkify]>=3.0.0",
     "mdit-py-plugins>=0.4.2",
     "toml>=0.10.2",
-    "typogrify>=2.1.0",
     "user-agents>=2.2.0",
     "utidylib>=0.10",
     "watchfiles>=1.0.5",
