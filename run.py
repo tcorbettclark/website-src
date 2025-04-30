@@ -177,7 +177,7 @@ class Builder:
 
 
 class _ServerAccessLogger(aiohttp.abc.AbstractAccessLogger):
-    # Use a hand-crafted httpio access logger to fully control the detail.
+    # Use a hand-crafted aiohttp access logger to better control the detail.
     # In particular, to unpack the User-Agent string.
 
     def log(self, request, response, time):
