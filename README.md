@@ -17,6 +17,7 @@ Mostly, see `output/maintaining_my_website.md`
 
 # TODO - technical
 
+* Issue warning if config.toml data overrides settings from elsewhere (since global).
 * Fix hot reloader on back/forward history (when dev tools closed)
 * Use the W3C Validator
 * Add Google analytics

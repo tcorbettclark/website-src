@@ -65,7 +65,7 @@ class Builder:
 
     def _add_template_data(self, env):
         for filename in glob.glob(
-            "**.toml", root_dir=self.output_dir, recursive=True
+            "**/*.toml", root_dir=self.output_dir, recursive=True
         ):
             log("Reading template data from: {}", filename)
             data = toml.load(self.output_dir / filename)
