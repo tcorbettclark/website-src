@@ -38,6 +38,12 @@ The key features of my approach are:
 * Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
 
+Look - localisation of content. Add to my website notes
+Indentation - for clarity in content view for easier writing and maintaining. But also want properly formatted output. Hence tidy.
+Also my website - explain value of writing and recording FOR ME. Think of it like a test. And might be useful for others.
+Why organise artefacts by type? Organise by use.
+
+
 TODO: explain math rendering (markdown plugin to escape and include in span with class, then small javascript hook to call katex on all cells after DOM loaded.)
 
 TODO: explain webmanifest file, especially for favicons

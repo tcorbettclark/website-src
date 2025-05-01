@@ -6,7 +6,3 @@
     --bulma-primary-s: 85%;
     --bulma-primary-l: 45%;
 }
-
-img[alt="img-200px-wide"] {
-    width: 200px;
-}
