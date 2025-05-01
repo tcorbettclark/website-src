@@ -14,6 +14,7 @@ import tidy
 import toml
 import user_agents
 import watchfiles
+from mdit_py_plugins.dollarmath import dollarmath_plugin as markdown_math_plugin
 from mdit_py_plugins.footnote import footnote_plugin as markdown_footnote_plugin
 
 ROOT_DIR = pathlib.Path(__file__).parent
@@ -48,13 +49,12 @@ class Builder:
         return pathlib.Path(filename).name[0] in ("_", ".")
 
     def _is_template_filename(self, filename):
-        # A template filename is a non-working filename with a .html extension.
+        # A template file has a non-working filename with a .html extension.
         p = pathlib.Path(filename)
         return p.suffix == ".html" and not self._is_working_filename(p)
 
     def create_fresh_output_directory(self):
         log(f"Using content in: {self.content_dir} ({{}})", self.content_dir)
-
         if os.path.exists(self.output_dir):
             shutil.rmtree(self.output_dir)
         shutil.copytree(self.content_dir, self.output_dir)
@@ -82,10 +82,12 @@ class Builder:
             else:
                 # Relative to main content root.
                 markdown_filename = self.output_dir / value
+            os.chdir(markdown_filename.parent)
             md = markdown_it.MarkdownIt(
                 "commonmark", {"typographer": True, "linkify": True}
             )
             md.use(markdown_footnote_plugin)
+            md.use(markdown_math_plugin)
             md.enable(["replacements", "smartquotes", "linkify", "table"])
             log("Converted markdown from: {}", markdown_filename)
             with open(markdown_filename, "r") as f:
@@ -294,8 +296,8 @@ async def main():
             await server.signal_hot_reloaders()
             await watcher.wait_for_change()
     except asyncio.CancelledError:
-        # asyncio raises CancelledError on ctrl-c signal.
-        # See https://docs.python.org/3/library/asyncio-runner.html#handling-keyboard-interruption
+        # asyncio raises CancelledError on ctrl-c signal
+        # (see https://docs.python.org/3/library/asyncio-runner.html#handling-keyboard-interruption).
         # We take responsibility for cleanup and swallow the exception.
         await server.stop()
         log("Bye")

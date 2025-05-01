@@ -38,6 +38,8 @@ The key features of my approach are:
 * Hot reloading localhost server, which rebuilds on change before signalling to browser(s) to reload.
 
 
+TODO: explain math rendering (markdown plugin to escape and include in span with class, then small javascript hook to call katex on all cells after DOM loaded.)
+
 TODO: explain webmanifest file, especially for favicons
 
 ## Colour and styling
